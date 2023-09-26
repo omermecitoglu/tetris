@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "ts-react-webpack-template",
+  "name": "tetris",
   "version": "1.0.0",
-  "description": "Typescript React Webpack Template",
+  "description": "Tetris with HTML 5 Canvas",
   "main": "index.js",
   "scripts": {
     "prebuild": "ts-unused-exports tsconfig.json",

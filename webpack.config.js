@@ -8,7 +8,7 @@ const path = require("path");
 const bundlePlugins = (mode) => {
   const plugins = [
     new HtmlWebpackPlugin({
-      title: "React App",
+      template: "src/index.html",
     }),
     new MiniCssExtractPlugin({
       filename: "style.css",

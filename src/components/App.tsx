@@ -2,7 +2,9 @@ import React from "react";
 
 const App = () => {
   return (
-    <div>Typescript React Webpack Template</div>
+    <div>
+      <img src="/icon.svg" alt="Logo" width="300" />
+    </div>
   );
 };
 
