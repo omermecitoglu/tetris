@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { COLUMNS, ROWS } from "~/core/constants";
 import { type Cells, renderTetromino } from "~/core/game";
 import { Tetromino } from "~/core/tetromino";
 import GameBoard from "./GameBoard";
 
 const App = () => {
-  const [actualCells, setActualCells] = useState<Cells>(Array(200).fill(null));
-  const [renderedCells, setRenderedCells] = useState<Cells>(Array(200).fill(null));
-  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("J", 14));
+  const [actualCells, setActualCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
+  const [renderedCells, setRenderedCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
+  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("J", Math.round(COLUMNS * 1.5 - 1)));
 
   useEffect(() => {
     setRenderedCells(renderTetromino(actualCells, currentTetromino));
@@ -20,6 +21,9 @@ const App = () => {
       if (e.key === "ArrowRight") {
         setCurrentTetromino(t => t.pushRight());
       }
+      if (e.key === "ArrowUp" && !e.repeat) {
+        setCurrentTetromino(t => t.rotate());
+      }
     };
 
     document.body.addEventListener("keydown", listener);
@@ -28,7 +32,7 @@ const App = () => {
     };
   }, []);
 
-  return <GameBoard columns={10} rows={20} size={32} cells={renderedCells} />;
+  return <GameBoard columns={COLUMNS} rows={ROWS} size={32} cells={renderedCells} />;
 };
 
 export default App;

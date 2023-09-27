@@ -1,13 +1,16 @@
-type TetrominoShape = "I" | "O" | "T" | "J" | "L" | "S" | "Z";
+import { COLUMNS } from "./constants";
+import { getBlocks } from "./rotations";
+
+export type TetrominoShape = "I" | "O" | "T" | "J" | "L" | "S" | "Z";
 
 export class Tetromino {
   position: number;
   rotation: number;
   shape: TetrominoShape;
 
-  constructor(shape: TetrominoShape, position: number) {
+  constructor(shape: TetrominoShape, position: number, rotation: number = 0) {
     this.position = position;
-    this.rotation = 0;
+    this.rotation = rotation;
     this.shape = shape;
   }
 
@@ -24,23 +27,22 @@ export class Tetromino {
   }
 
   get blocks() {
-    return [
-      this.position - 11,
-      this.position - 1,
-      this.position,
-      this.position + 1,
-    ];
+    return getBlocks(this.shape, this.position, this.rotation);
   }
 
   pushLeft() {
     const min = Math.min(...this.blocks);
-    if (min % 10 <= 0) return this;
-    return new Tetromino(this.shape, this.position - 1);
+    if (min % COLUMNS <= 0) return this;
+    return new Tetromino(this.shape, this.position - 1, this.rotation);
   }
 
   pushRight() {
     const max = Math.max(...this.blocks);
-    if (max % 10 > 8) return this;
-    return new Tetromino(this.shape, this.position + 1);
+    if (max % COLUMNS >= COLUMNS - 1) return this;
+    return new Tetromino(this.shape, this.position + 1, this.rotation);
+  }
+
+  rotate() {
+    return new Tetromino(this.shape, this.position, (this.rotation + 1) % 4);
   }
 }
