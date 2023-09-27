@@ -5,6 +5,7 @@ import { Tetromino } from "~/core/tetromino";
 import GameBoard from "./GameBoard";
 
 const App = () => {
+  const [over, setOver] = useState(false);
   const [actualCells, setActualCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
   const [renderedCells, setRenderedCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
   const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("J", SPAWN_POSITION));
@@ -14,10 +15,16 @@ const App = () => {
   };
 
   useEffect(() => {
-    setRenderedCells(renderTetromino(actualCells, currentTetromino));
+    if (currentTetromino.willCollide(0, actualCells)) {
+      setOver(true);
+    } else {
+      setRenderedCells(renderTetromino(actualCells, currentTetromino));
+    }
   }, [currentTetromino]);
 
   useEffect(() => {
+    if (over) return alert("Game Over");
+
     const timer = setInterval(() => {
       setCurrentTetromino(t => moveTetrominoDown(t, actualCells, commit));
     }, 100);
@@ -39,7 +46,7 @@ const App = () => {
       clearInterval(timer);
       document.body.removeEventListener("keydown", listener);
     };
-  }, [actualCells]);
+  }, [over, actualCells]);
 
   return <GameBoard columns={COLUMNS} rows={ROWS} size={32} cells={renderedCells} />;
 };
