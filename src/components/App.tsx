@@ -6,7 +6,7 @@ import GameBoard from "./GameBoard";
 const App = () => {
   const [actualCells, setActualCells] = useState<Cells>(Array(200).fill(null));
   const [renderedCells, setRenderedCells] = useState<Cells>(Array(200).fill(null));
-  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino(14));
+  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("J", 14));
 
   useEffect(() => {
     setRenderedCells(renderTetromino(actualCells, currentTetromino));
