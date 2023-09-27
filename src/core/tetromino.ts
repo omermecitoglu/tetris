@@ -1,4 +1,5 @@
 import { COLUMNS } from "./constants";
+import { type Cells, checkCollision } from "./game";
 import { getBlocks } from "./rotations";
 
 export type TetrominoShape = "I" | "O" | "T" | "J" | "L" | "S" | "Z";
@@ -44,5 +45,15 @@ export class Tetromino {
 
   rotate() {
     return new Tetromino(this.shape, this.position, (this.rotation + 1) % 4);
+  }
+
+  goDown() {
+    return new Tetromino(this.shape, this.position + COLUMNS, this.rotation);
+  }
+
+  willCollide(movement: number, cells: Cells) {
+    const next = new Tetromino(this.shape, this.position + movement, this.rotation);
+    const collision = next.blocks.find(b => checkCollision(b, cells));
+    return collision;
   }
 }
