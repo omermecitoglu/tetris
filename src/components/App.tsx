@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import Game from "./Game";
 
 const App = () => {
-  return <Game />;
+  const [score, setScore] = useState(0);
+  return (
+    <main>
+      <Game setScore={setScore} />
+      <div>Score {score}</div>
+    </main>
+  );
 };
 
 export default App;

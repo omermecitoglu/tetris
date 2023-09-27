@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { COLUMNS, ROWS, SPAWN_POSITION } from "~/core/constants";
-import { type Cells, moveTetrominoDown, renderTetromino } from "~/core/game";
+import { type Cells, clearRows, moveTetrominoDown, renderTetromino } from "~/core/game";
 import { Tetromino } from "~/core/tetromino";
 import GameBoard from "./GameBoard";
 
-const Game = () => {
+type GameProps = {
+  setScore: React.Dispatch<React.SetStateAction<number>>,
+};
+
+const Game = ({
+  setScore,
+}: GameProps) => {
   const [isOver, setIsOver] = useState(false);
   const [actualCells, setActualCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
   const [renderedCells, setRenderedCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
   const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("J", SPAWN_POSITION));
 
   const commit = (tetromino: Tetromino) => {
-    setActualCells(cells => renderTetromino(cells, tetromino));
+    setActualCells(cells => clearRows(renderTetromino(cells, tetromino), score => setScore(oldScore => oldScore + score)));
   };
 
   useEffect(() => {
@@ -20,14 +26,14 @@ const Game = () => {
     } else {
       setRenderedCells(renderTetromino(actualCells, currentTetromino));
     }
-  }, [currentTetromino]);
+  }, [currentTetromino, actualCells]);
 
   useEffect(() => {
     if (isOver) return alert("Game Over");
 
     const timer = setInterval(() => {
       setCurrentTetromino(t => moveTetrominoDown(t, actualCells, commit));
-    }, 100);
+    }, 250);
 
     const listener = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
