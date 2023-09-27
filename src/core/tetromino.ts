@@ -17,4 +17,16 @@ export class Tetromino {
       this.position + 1,
     ];
   }
+
+  pushLeft() {
+    const min = Math.min(...this.blocks);
+    if (min % 10 <= 0) return this;
+    return new Tetromino(this.position - 1);
+  }
+
+  pushRight() {
+    const max = Math.max(...this.blocks);
+    if (max % 10 > 8) return this;
+    return new Tetromino(this.position + 1);
+  }
 }

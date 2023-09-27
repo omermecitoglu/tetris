@@ -12,6 +12,22 @@ const App = () => {
     setRenderedCells(renderTetromino(actualCells, currentTetromino));
   }, [currentTetromino]);
 
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        setCurrentTetromino(t => t.pushLeft());
+      }
+      if (e.key === "ArrowRight") {
+        setCurrentTetromino(t => t.pushRight());
+      }
+    };
+
+    document.body.addEventListener("keydown", listener);
+    return () => {
+      document.body.removeEventListener("keydown", listener);
+    };
+  }, []);
+
   return <GameBoard columns={10} rows={20} size={32} cells={renderedCells} />;
 };
 
