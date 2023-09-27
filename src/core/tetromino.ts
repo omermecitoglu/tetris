@@ -31,16 +31,18 @@ export class Tetromino {
     return getBlocks(this.shape, this.position, this.rotation);
   }
 
-  pushLeft() {
+  pushLeft(cells: Cells) {
     const min = Math.min(...this.blocks.map(b => b % COLUMNS));
     if (min % COLUMNS <= 0) return this;
-    return new Tetromino(this.shape, this.position - 1, this.rotation);
+    const next = new Tetromino(this.shape, this.position - 1, this.rotation);
+    return next.willCollide(0, cells) ? this : next;
   }
 
-  pushRight() {
+  pushRight(cells: Cells) {
     const max = Math.max(...this.blocks.map(b => b % COLUMNS));
     if (max % COLUMNS >= COLUMNS - 1) return this;
-    return new Tetromino(this.shape, this.position + 1, this.rotation);
+    const next = new Tetromino(this.shape, this.position + 1, this.rotation);
+    return next.willCollide(0, cells) ? this : next;
   }
 
   rotate() {

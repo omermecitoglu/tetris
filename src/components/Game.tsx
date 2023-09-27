@@ -37,10 +37,10 @@ const Game = ({
 
     const listener = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
-        setCurrentTetromino(t => t.pushLeft());
+        setCurrentTetromino(t => t.pushLeft(actualCells));
       }
       if (e.key === "ArrowRight") {
-        setCurrentTetromino(t => t.pushRight());
+        setCurrentTetromino(t => t.pushRight(actualCells));
       }
       if (e.key === "ArrowUp" && !e.repeat) {
         setCurrentTetromino(t => t.rotate());
