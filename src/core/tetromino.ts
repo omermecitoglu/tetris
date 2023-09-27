@@ -1,6 +1,7 @@
 import { COLUMNS } from "./constants";
 import { type Cells, checkCollision } from "./game";
 import { getBlocks } from "./rotations";
+import { checkWallKick } from "./wall-kicks";
 
 export type TetrominoShape = "I" | "O" | "T" | "J" | "L" | "S" | "Z";
 
@@ -45,8 +46,10 @@ export class Tetromino {
     return next.willCollide(0, cells) ? this : next;
   }
 
-  rotate() {
-    return new Tetromino(this.shape, this.position, (this.rotation + 1) % 4);
+  rotate(cells: Cells) {
+    const wallKick = checkWallKick(this, cells);
+    const next = new Tetromino(this.shape, this.position + wallKick, (this.rotation + 1) % 4);
+    return next.willCollide(0, cells) ? this : next;
   }
 
   goDown() {

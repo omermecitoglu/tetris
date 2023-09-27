@@ -14,7 +14,7 @@ const Game = ({
   const [isOver, setIsOver] = useState(false);
   const [actualCells, setActualCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
   const [renderedCells, setRenderedCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
-  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("J", SPAWN_POSITION));
+  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("I", SPAWN_POSITION));
 
   const commit = (tetromino: Tetromino) => {
     setActualCells(cells => clearRows(renderTetromino(cells, tetromino), score => setScore(oldScore => oldScore + score)));
@@ -23,9 +23,9 @@ const Game = ({
   useEffect(() => {
     if (currentTetromino.willCollide(0, actualCells)) {
       setIsOver(true);
-    } else {
-      setRenderedCells(renderTetromino(actualCells, currentTetromino));
     }
+    setRenderedCells(renderTetromino(actualCells, currentTetromino));
+
   }, [currentTetromino, actualCells]);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const Game = ({
 
     const timer = setInterval(() => {
       setCurrentTetromino(t => moveTetrominoDown(t, actualCells, commit));
-    }, 250);
+    }, 200);
 
     const listener = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
@@ -43,7 +43,7 @@ const Game = ({
         setCurrentTetromino(t => t.pushRight(actualCells));
       }
       if (e.key === "ArrowUp" && !e.repeat) {
-        setCurrentTetromino(t => t.rotate());
+        setCurrentTetromino(t => t.rotate(actualCells));
       }
     };
 
