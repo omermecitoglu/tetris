@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import Game from "./Game";
 
 const App = () => {
-  const [score, setScore] = useState(0);
   return (
     <main>
       <div></div>
-      <Game setScore={setScore} />
-      <div>Score {score}</div>
+      <Game />
     </main>
   );
 };

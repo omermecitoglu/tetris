@@ -4,20 +4,21 @@ import { type Cells, clearRows, moveTetrominoDown, renderTetromino } from "~/cor
 import { Tetromino } from "~/core/tetromino";
 import GameBoard from "./GameBoard";
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type GameProps = {
-  setScore: React.Dispatch<React.SetStateAction<number>>,
 };
 
+// eslint-disable-next-line no-empty-pattern
 const Game = ({
-  setScore,
 }: GameProps) => {
   const [isOver, setIsOver] = useState(false);
+  const [score, setScore] = useState(0);
   const [actualCells, setActualCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
   const [renderedCells, setRenderedCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
   const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino("I", SPAWN_POSITION));
 
   const commit = (tetromino: Tetromino) => {
-    setActualCells(cells => clearRows(renderTetromino(cells, tetromino), score => setScore(oldScore => oldScore + score)));
+    setActualCells(cells => clearRows(renderTetromino(cells, tetromino), addition => setScore(oldScore => oldScore + addition)));
   };
 
   useEffect(() => {
@@ -25,7 +26,6 @@ const Game = ({
       setIsOver(true);
     }
     setRenderedCells(renderTetromino(actualCells, currentTetromino));
-
   }, [currentTetromino, actualCells]);
 
   useEffect(() => {
@@ -54,7 +54,16 @@ const Game = ({
     };
   }, [isOver, actualCells]);
 
-  return <GameBoard columns={COLUMNS} rows={ROWS} size={32} cells={renderedCells} />;
+  return (
+    <>
+      <div>
+        <GameBoard columns={COLUMNS} rows={ROWS} size={32} cells={renderedCells} />
+      </div>
+      <div>
+        <div>Score {score}</div>
+      </div>
+    </>
+  );
 };
 
 export default Game;
