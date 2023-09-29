@@ -1,10 +1,12 @@
 import { COLUMNS, ROWS, SPAWN_POSITION } from "./constants";
 import { Tetromino, type TetrominoShape } from "./tetromino";
-import { pickRandom } from "./utils";
+import { shuffle } from "./utils";
 
 export type Cells = Array<string | null>;
 
-const shapes: TetrominoShape[] = ["I", "O", "T", "J", "L", "S", "Z"];
+export function generateShuffledShapes(): TetrominoShape[] {
+  return shuffle(["I", "O", "T", "J", "L", "S", "Z"]);
+}
 
 export function renderTetromino(cells: Cells, tetromino: Tetromino): Cells {
   return cells.map((cell, index) => tetromino.blocks.includes(index) ? tetromino.color : cell);
@@ -16,10 +18,10 @@ export function checkCollision(block: number, cells: Cells) {
   return false;
 }
 
-export function moveTetrominoDown(tetromino: Tetromino, cells: Cells, commit: (t: Tetromino) => void) {
+export function moveTetrominoDown(tetromino: Tetromino, cells: Cells, commit: (t: Tetromino) => TetrominoShape) {
   if (tetromino.willCollide(COLUMNS, cells)) {
-    commit(tetromino);
-    return new Tetromino(pickRandom(shapes), SPAWN_POSITION);
+    const nextShape = commit(tetromino);
+    return new Tetromino(nextShape, SPAWN_POSITION);
   }
   return tetromino.goDown();
 }

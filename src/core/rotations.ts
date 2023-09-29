@@ -1,4 +1,3 @@
-import { COLUMNS } from "./constants";
 import type { TetrominoShape } from "./tetromino";
 
 const rotations = (p: number, c: number): Record<TetrominoShape, number[][]> => ({
@@ -46,6 +45,6 @@ const rotations = (p: number, c: number): Record<TetrominoShape, number[][]> => 
   ],
 });
 
-export function getBlocks(shape: TetrominoShape, position: number, rotation: number) {
-  return rotations(position, COLUMNS)[shape][rotation];
+export function getBlocks(shape: TetrominoShape, position: number, rotation: number, columns: number) {
+  return rotations(position, columns)[shape][rotation];
 }

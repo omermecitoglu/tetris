@@ -9,11 +9,13 @@ export class Tetromino {
   position: number;
   rotation: number;
   shape: TetrominoShape;
+  containerSize: number;
 
-  constructor(shape: TetrominoShape, position: number, rotation: number = 0) {
+  constructor(shape: TetrominoShape, position: number, rotation: number = 0, containerSize: number = COLUMNS) {
     this.position = position;
     this.rotation = rotation;
     this.shape = shape;
+    this.containerSize = containerSize;
   }
 
   get color() {
@@ -29,19 +31,19 @@ export class Tetromino {
   }
 
   get blocks() {
-    return getBlocks(this.shape, this.position, this.rotation);
+    return getBlocks(this.shape, this.position, this.rotation, this.containerSize);
   }
 
   pushLeft(cells: Cells) {
-    const min = Math.min(...this.blocks.map(b => b % COLUMNS));
-    if (min % COLUMNS <= 0) return this;
+    const min = Math.min(...this.blocks.map(b => b % this.containerSize));
+    if (min % this.containerSize <= 0) return this;
     const next = new Tetromino(this.shape, this.position - 1, this.rotation);
     return next.willCollide(0, cells) ? this : next;
   }
 
   pushRight(cells: Cells) {
-    const max = Math.max(...this.blocks.map(b => b % COLUMNS));
-    if (max % COLUMNS >= COLUMNS - 1) return this;
+    const max = Math.max(...this.blocks.map(b => b % this.containerSize));
+    if (max % this.containerSize >= this.containerSize - 1) return this;
     const next = new Tetromino(this.shape, this.position + 1, this.rotation);
     return next.willCollide(0, cells) ? this : next;
   }
@@ -53,7 +55,7 @@ export class Tetromino {
   }
 
   goDown() {
-    return new Tetromino(this.shape, this.position + COLUMNS, this.rotation);
+    return new Tetromino(this.shape, this.position + this.containerSize, this.rotation);
   }
 
   willCollide(movement: number, cells: Cells) {
