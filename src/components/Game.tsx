@@ -1,27 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { COLUMNS, ROWS, SPAWN_POSITION } from "~/core/constants";
 import { type Cells, clearRows, generateShuffledShapes, moveTetrominoDown, renderTetromino } from "~/core/game";
 import { Tetromino, type TetrominoShape } from "~/core/tetromino";
 import GameBoard from "./GameBoard";
 import PreviewBoard from "./PreviewBoard";
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type GameProps = {
+  width: number,
+  height: number,
 };
 
-// eslint-disable-next-line no-empty-pattern
 const Game = ({
+  width,
+  height,
 }: GameProps) => {
+  const spawnPosition = Math.round(width * 1.5 - 1);
   const firstSet = generateShuffledShapes();
   const [isOver, setIsOver] = useState(false);
   const [score, setScore] = useState(0);
   const [nextTetrominoes, setNextTetrominoes] = useState<TetrominoShape[]>(firstSet.slice(1, 7));
-  const [actualCells, setActualCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
-  const [renderedCells, setRenderedCells] = useState<Cells>(Array(COLUMNS * ROWS).fill(null));
-  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino(firstSet[0], SPAWN_POSITION));
+  const [actualCells, setActualCells] = useState<Cells>(Array(width * height).fill(null));
+  const [renderedCells, setRenderedCells] = useState<Cells>(Array(width * height).fill(null));
+  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino(firstSet[0], spawnPosition, 0, width, height));
 
   const commit = (tetromino: Tetromino) => {
-    setActualCells(cells => clearRows(renderTetromino(cells, tetromino), addition => setScore(oldScore => oldScore + addition)));
+    setActualCells(cells => clearRows(width, renderTetromino(cells, tetromino), addition => setScore(oldScore => oldScore + addition)));
     const next = nextTetrominoes.shift();
     if (!next) throw new Error("Something went wrong!");
     if (nextTetrominoes.length <= 7) {
@@ -43,7 +45,7 @@ const Game = ({
     if (isOver) return alert("Game Over");
 
     const timer = setInterval(() => {
-      setCurrentTetromino(t => moveTetrominoDown(t, actualCells, commit));
+      setCurrentTetromino(t => moveTetrominoDown(t, actualCells, width, height, commit));
     }, 200);
 
     const listener = (e: KeyboardEvent) => {
@@ -68,7 +70,7 @@ const Game = ({
   return (
     <>
       <div>
-        <GameBoard columns={COLUMNS} rows={ROWS} size={32} cells={renderedCells} />
+        <GameBoard columns={width} rows={height} size={32} cells={renderedCells} />
       </div>
       <div>
         <div>Score {score}</div>

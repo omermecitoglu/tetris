@@ -5,7 +5,7 @@ const App = () => {
   return (
     <main>
       <div></div>
-      <Game />
+      <Game width={10} height={20} />
     </main>
   );
 };

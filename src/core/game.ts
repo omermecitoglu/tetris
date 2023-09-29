@@ -1,4 +1,3 @@
-import { COLUMNS, ROWS, SPAWN_POSITION } from "./constants";
 import { Tetromino, type TetrominoShape } from "./tetromino";
 import { shuffle } from "./utils";
 
@@ -12,29 +11,30 @@ export function renderTetromino(cells: Cells, tetromino: Tetromino): Cells {
   return cells.map((cell, index) => tetromino.blocks.includes(index) ? tetromino.color : cell);
 }
 
-export function checkCollision(block: number, cells: Cells) {
-  if (block >= ROWS * COLUMNS) return true;
+export function checkCollision(block: number, cells: Cells, columns: number, rows: number) {
+  if (block >= rows * columns) return true;
   if (cells[block] !== null) return true;
   return false;
 }
 
-export function moveTetrominoDown(tetromino: Tetromino, cells: Cells, commit: (t: Tetromino) => TetrominoShape) {
-  if (tetromino.willCollide(COLUMNS, cells)) {
+export function moveTetrominoDown(tetromino: Tetromino, cells: Cells, columns: number, rows: number, commit: (t: Tetromino) => TetrominoShape) {
+  if (tetromino.willCollide(columns, cells)) {
+    const spawnPosition = Math.round(columns * 1.5 - 1);
     const nextShape = commit(tetromino);
-    return new Tetromino(nextShape, SPAWN_POSITION);
+    return new Tetromino(nextShape, spawnPosition, 0, columns, rows);
   }
   return tetromino.goDown();
 }
 
-export function clearRows(cells: Cells, addScore: (score: number) => void): Cells {
+export function clearRows(columns: number, cells: Cells, addScore: (score: number) => void): Cells {
   let score = 0;
   const rows = [];
   while (cells.length) {
-    const row = cells.splice(0, COLUMNS);
+    const row = cells.splice(0, columns);
     const index = row.findIndex(cell => cell === null);
     if (index === -1) {
       score++;
-      rows.unshift(Array(COLUMNS).fill(null));
+      rows.unshift(Array(columns).fill(null));
     } else {
       rows.push(row);
     }
