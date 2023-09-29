@@ -1,4 +1,4 @@
-import { type Cells, checkCollision } from "./game";
+import { type Grid, checkCollision } from "./game";
 import { getBlocks } from "./rotations";
 import { checkWallKick } from "./wall-kicks";
 
@@ -39,28 +39,28 @@ export class Tetromino {
     return new Tetromino(this.shape, this.position, this.rotation, this.boardWidth, this.boardHeight);
   }
 
-  pushLeft(cells: Cells) {
+  pushLeft(grid: Grid) {
     const min = Math.min(...this.blocks.map(b => b % this.boardWidth));
     if (min % this.boardWidth <= 0) return this;
     const clone = this.clone();
     clone.position--;
-    return clone.willCollide(0, cells) ? this : clone;
+    return clone.willCollide(0, grid) ? this : clone;
   }
 
-  pushRight(cells: Cells) {
+  pushRight(grid: Grid) {
     const max = Math.max(...this.blocks.map(b => b % this.boardWidth));
     if (max % this.boardWidth >= this.boardWidth - 1) return this;
     const clone = this.clone();
     clone.position++;
-    return clone.willCollide(0, cells) ? this : clone;
+    return clone.willCollide(0, grid) ? this : clone;
   }
 
-  rotate(cells: Cells) {
-    const wallKick = checkWallKick(this, cells, this.boardWidth, this.boardHeight);
+  rotate(grid: Grid) {
+    const wallKick = checkWallKick(this, grid, this.boardWidth, this.boardHeight);
     const clone = this.clone();
     clone.position += wallKick;
     clone.rotation = (this.rotation + 1) % 4;
-    return clone.willCollide(0, cells) ? this : clone;
+    return clone.willCollide(0, grid) ? this : clone;
   }
 
   goDown() {
@@ -69,9 +69,9 @@ export class Tetromino {
     return clone;
   }
 
-  willCollide(movement: number, cells: Cells) {
+  willCollide(movement: number, grid: Grid) {
     const clone = this.clone();
     clone.position += movement;
-    return clone.blocks.find(b => checkCollision(b, cells, clone.boardWidth, clone.boardHeight));
+    return clone.blocks.find(b => checkCollision(b, grid, clone.boardWidth, clone.boardHeight));
   }
 }

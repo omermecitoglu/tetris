@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { type Cells, clearRows, generateShuffledShapes, moveTetrominoDown, renderTetromino } from "~/core/game";
+import { type Grid, clearRows, generateShuffledShapes, moveTetrominoDown, renderTetromino } from "~/core/game";
 import { Tetromino, type TetrominoShape } from "~/core/tetromino";
 import GameBoard from "./GameBoard";
 import PreviewBoard from "./PreviewBoard";
@@ -13,17 +13,14 @@ const Game = ({
   width,
   height,
 }: GameProps) => {
-  const spawnPosition = Math.round(width * 1.5 - 1);
-  const firstSet = generateShuffledShapes();
   const [isOver, setIsOver] = useState(false);
   const [score, setScore] = useState(0);
-  const [nextTetrominoes, setNextTetrominoes] = useState<TetrominoShape[]>(firstSet.slice(1, 7));
-  const [actualCells, setActualCells] = useState<Cells>(Array(width * height).fill(null));
-  const [renderedCells, setRenderedCells] = useState<Cells>(Array(width * height).fill(null));
-  const [currentTetromino, setCurrentTetromino] = useState<Tetromino>(new Tetromino(firstSet[0], spawnPosition, 0, width, height));
+  const [commitedGrid, setCommitedGrid] = useState<Grid | null>(null);
+  const [renderedGrid, setRenderedGrid] = useState<Grid | null>(null);
+  const [currentTetromino, setCurrentTetromino] = useState<Tetromino | null>(null);
+  const [nextTetrominoes, setNextTetrominoes] = useState<TetrominoShape[]>([]);
 
-  const commit = (tetromino: Tetromino) => {
-    setActualCells(cells => clearRows(width, renderTetromino(cells, tetromino), addition => setScore(oldScore => oldScore + addition)));
+  const fetchNextTetromino = () => {
     const next = nextTetrominoes.shift();
     if (!next) throw new Error("Something went wrong!");
     if (nextTetrominoes.length <= 7) {
@@ -34,43 +31,73 @@ const Game = ({
     return next;
   };
 
+  const commit = (tetromino: Tetromino) => {
+    setCommitedGrid(g => g && clearRows(width, renderTetromino(g, tetromino), addition => setScore(oldScore => oldScore + addition)));
+    return fetchNextTetromino();
+  };
+
   useEffect(() => {
-    if (currentTetromino.willCollide(0, actualCells)) {
-      setIsOver(true);
+    const emptyGrid = Array(width * height).fill(null);
+    const spawnPosition = Math.round(width * 1.5 - 1);
+    const firstSet = generateShuffledShapes();
+    setScore(0);
+    setCommitedGrid(emptyGrid);
+    const firstTetromino = firstSet.shift();
+    if (firstTetromino) {
+      setCurrentTetromino(new Tetromino(firstTetromino, spawnPosition, 0, width, height));
     }
-    setRenderedCells(renderTetromino(actualCells, currentTetromino));
-  }, [currentTetromino, actualCells]);
+    setNextTetrominoes(firstSet);
+    return () => {
+      setScore(0);
+      setCommitedGrid(null);
+      setRenderedGrid(null);
+      setCurrentTetromino(null);
+      setNextTetrominoes([]);
+    };
+  }, [width, height]);
+
+  useEffect(() => {
+    if (!commitedGrid || !currentTetromino) return ;
+    setRenderedGrid(renderTetromino(commitedGrid, currentTetromino));
+  }, [currentTetromino, commitedGrid]);
 
   useEffect(() => {
     if (isOver) return alert("Game Over");
+    if (!commitedGrid || !currentTetromino) return;
+
+    if (currentTetromino.willCollide(0, commitedGrid)) {
+      return setIsOver(true);
+    }
 
     const timer = setInterval(() => {
-      setCurrentTetromino(t => moveTetrominoDown(t, actualCells, width, height, commit));
+      setCurrentTetromino(t => t && moveTetrominoDown(t, commitedGrid, width, height, commit));
     }, 200);
 
-    const listener = (e: KeyboardEvent) => {
+    const keyListener = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
-        setCurrentTetromino(t => t.pushLeft(actualCells));
+        setCurrentTetromino(t => t && t.pushLeft(commitedGrid));
       }
       if (e.key === "ArrowRight") {
-        setCurrentTetromino(t => t.pushRight(actualCells));
+        setCurrentTetromino(t => t && t.pushRight(commitedGrid));
       }
       if (e.key === "ArrowUp" && !e.repeat) {
-        setCurrentTetromino(t => t.rotate(actualCells));
+        setCurrentTetromino(t => t && t.rotate(commitedGrid));
       }
     };
+    document.body.addEventListener("keydown", keyListener);
 
-    document.body.addEventListener("keydown", listener);
     return () => {
       clearInterval(timer);
-      document.body.removeEventListener("keydown", listener);
+      document.body.removeEventListener("keydown", keyListener);
     };
-  }, [isOver, actualCells]);
+  }, [isOver, commitedGrid]);
 
   return (
     <>
       <div>
-        <GameBoard columns={width} rows={height} size={32} cells={renderedCells} />
+        {commitedGrid &&
+          <GameBoard columns={width} rows={height} size={32} grid={renderedGrid ?? commitedGrid} />
+        }
       </div>
       <div>
         <div>Score {score}</div>

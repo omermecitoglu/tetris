@@ -1,21 +1,21 @@
 import React from "react";
-import type { Cells } from "~/core/game";
+import type { Grid } from "~/core/game";
 
 type GameBoardProps = {
   columns: number,
   rows: number,
   size: number,
-  cells: Cells,
+  grid: Grid,
 };
 
 const GameBoard = ({
   columns,
   rows,
   size,
-  cells,
+  grid,
 }: GameBoardProps) => (
   <svg width={columns * size + 2} height={rows * size + 2}>
-    {cells.map((color, index) =>
+    {grid.map((color, index) =>
       <rect
         key={index}
         fill={color ?? "black"}

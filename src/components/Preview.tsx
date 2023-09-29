@@ -28,14 +28,14 @@ const Preview = ({
     }
   }, [shape]);
 
-  const emptyCells = Array(columns * 2).fill(null);
-  const [cells, setCells] = useState(emptyCells);
+  const emptyGrid = Array(columns * 2).fill(null);
+  const [grid, setGrid] = useState(emptyGrid);
 
   useEffect(() => {
-    setCells(renderTetromino(emptyCells, new Tetromino(shape, startPos, 0, columns, rows)));
+    setGrid(renderTetromino(emptyGrid, new Tetromino(shape, startPos, 0, columns, rows)));
   }, [shape, columns]);
 
-  return <GameBoard columns={columns} rows={rows} size={32} cells={cells} />;
+  return <GameBoard columns={columns} rows={rows} size={32} grid={grid} />;
 };
 
 export default Preview;
