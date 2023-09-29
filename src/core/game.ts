@@ -1,14 +1,34 @@
 import { Tetromino, type TetrominoShape } from "./tetromino";
 import { shuffle } from "./utils";
 
-export type Grid = Array<string | null>;
+type Cell = {
+  color: string,
+  isShadow: boolean,
+};
+
+export type Grid = Array<Cell | null>;
 
 export function generateShuffledShapes(): TetrominoShape[] {
   return shuffle(["I", "O", "T", "J", "L", "S", "Z"]);
 }
 
 export function renderTetromino(grid: Grid, tetromino: Tetromino): Grid {
-  return grid.map((cell, index) => tetromino.blocks.includes(index) ? tetromino.color : cell);
+  const shadow = tetromino.findShadow(grid);
+  return grid.map((cell, index) => {
+    if (tetromino.blocks.includes(index)) {
+      return {
+        color: tetromino.color,
+        isShadow: false,
+      };
+    }
+    if (shadow.includes(index)) {
+      return {
+        color: tetromino.color,
+        isShadow: true,
+      };
+    }
+    return cell;
+  });
 }
 
 export function checkCollision(block: number, grid: Grid, columns: number, rows: number) {

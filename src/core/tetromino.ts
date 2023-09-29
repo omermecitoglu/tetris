@@ -74,4 +74,17 @@ export class Tetromino {
     clone.position += movement;
     return clone.blocks.find(b => checkCollision(b, grid, clone.boardWidth, clone.boardHeight));
   }
+
+  findShadow(grid: Grid) {
+    const clone = this.clone();
+    let moved = false;
+    while (!clone.willCollide(0, grid)) {
+      moved = true;
+      clone.position += clone.boardWidth;
+    }
+    if (moved) {
+      clone.position -= clone.boardWidth;
+    }
+    return clone.blocks;
+  }
 }

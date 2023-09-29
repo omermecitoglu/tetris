@@ -15,14 +15,15 @@ const GameBoard = ({
   grid,
 }: GameBoardProps) => (
   <svg width={columns * size + 2} height={rows * size + 2}>
-    {grid.map((color, index) =>
+    {grid.map((cell, index) =>
       <rect
         key={index}
-        fill={color ?? "black"}
-        x={(index % columns) * size + 2}
-        y={Math.floor(index / columns) * size + 2}
-        width={size - 2}
-        height={size - 2}
+        fill={(cell && !cell.isShadow && cell.color) || "black"}
+        stroke={(cell && cell.isShadow && cell.color) || undefined}
+        x={(index % columns) * size + (cell?.isShadow === true ? 3 : 2)}
+        y={Math.floor(index / columns) * size + (cell?.isShadow === true ? 3 : 2)}
+        width={size - (cell?.isShadow === true ? 4 : 2)}
+        height={size - (cell?.isShadow === true ? 4 : 2)}
       />
     )}
   </svg>
