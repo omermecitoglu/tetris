@@ -3,6 +3,7 @@ import { COLUMNS, ROWS, SPAWN_POSITION } from "~/core/constants";
 import { type Cells, clearRows, generateShuffledShapes, moveTetrominoDown, renderTetromino } from "~/core/game";
 import { Tetromino, type TetrominoShape } from "~/core/tetromino";
 import GameBoard from "./GameBoard";
+import PreviewBoard from "./PreviewBoard";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type GameProps = {
@@ -71,6 +72,7 @@ const Game = ({
       </div>
       <div>
         <div>Score {score}</div>
+        <PreviewBoard list={nextTetrominoes.slice(0, 3)} />
       </div>
     </>
   );

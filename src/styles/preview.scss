@@ -1,0 +1,14 @@
+.preview-board {
+  &__header {
+    text-align: center;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 9rem;
+    height: 14rem;
+  }
+}
