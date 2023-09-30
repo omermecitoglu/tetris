@@ -13,8 +13,11 @@ const Game = ({
   width,
   height,
 }: GameProps) => {
+  const level = 1;
+  const speed = (0.8 - ((level - 1) * 0.007)) * 1000;
   const [isOver, setIsOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [turbo, setTurbo] = useState(false);
   const [commitedGrid, setCommitedGrid] = useState<Grid | null>(null);
   const [renderedGrid, setRenderedGrid] = useState<Grid | null>(null);
   const [currentTetromino, setCurrentTetromino] = useState<Tetromino | null>(null);
@@ -71,9 +74,9 @@ const Game = ({
 
     const timer = setInterval(() => {
       setCurrentTetromino(t => t && moveTetrominoDown(t, commitedGrid, width, height, commit));
-    }, 200);
+    }, turbo ? 50 : speed);
 
-    const keyListener = (e: KeyboardEvent) => {
+    const keyDownListener = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
         setCurrentTetromino(t => t && t.pushLeft(commitedGrid));
       }
@@ -83,14 +86,28 @@ const Game = ({
       if (e.key === "ArrowUp" && !e.repeat) {
         setCurrentTetromino(t => t && t.rotate(commitedGrid));
       }
+      if (e.key === "ArrowDown" && !e.repeat) {
+        setTurbo(true);
+      }
+      if (e.key === " " && !e.repeat) {
+        setCurrentTetromino(t => t && t.getShadow(commitedGrid));
+      }
     };
-    document.body.addEventListener("keydown", keyListener);
+    document.body.addEventListener("keydown", keyDownListener);
+
+    const keyUpListener = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown" && !e.repeat) {
+        setTurbo(false);
+      }
+    };
+    document.body.addEventListener("keyup", keyUpListener);
 
     return () => {
       clearInterval(timer);
-      document.body.removeEventListener("keydown", keyListener);
+      document.body.removeEventListener("keydown", keyDownListener);
+      document.body.removeEventListener("keyup", keyUpListener);
     };
-  }, [isOver, commitedGrid]);
+  }, [isOver, commitedGrid, turbo]);
 
   return (
     <>

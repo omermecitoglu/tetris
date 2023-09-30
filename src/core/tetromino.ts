@@ -75,7 +75,7 @@ export class Tetromino {
     return clone.blocks.find(b => checkCollision(b, grid, clone.boardWidth, clone.boardHeight));
   }
 
-  findShadow(grid: Grid) {
+  getShadow(grid: Grid) {
     const clone = this.clone();
     let moved = false;
     while (!clone.willCollide(0, grid)) {
@@ -85,6 +85,10 @@ export class Tetromino {
     if (moved) {
       clone.position -= clone.boardWidth;
     }
-    return clone.blocks;
+    return clone;
+  }
+
+  findShadow(grid: Grid) {
+    return this.getShadow(grid).blocks;
   }
 }
