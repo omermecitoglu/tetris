@@ -46,7 +46,7 @@ export function moveTetrominoDown(tetromino: Tetromino, grid: Grid, columns: num
   return tetromino.goDown();
 }
 
-export function clearRows(columns: number, grid: Grid, addScore: (score: number) => void): Grid {
+export function clearRows(columns: number, grid: Grid, addLines: (score: number) => void): Grid {
   let score = 0;
   const rows = [];
   while (grid.length) {
@@ -59,6 +59,6 @@ export function clearRows(columns: number, grid: Grid, addScore: (score: number)
       rows.push(row);
     }
   }
-  addScore(score);
+  addLines(score);
   return rows.flat();
 }

@@ -17,8 +17,8 @@ const Game = ({
   height,
 }: GameProps) => {
   const [isOver, setIsOver] = useState(false);
-  const [level, setLevel] = useState(1);
-  const [score, setScore] = useState(0);
+  const [clearedLines, setClearedLines] = useState(0);
+  const level = Math.floor(clearedLines / 10);
   const [commitedGrid, setCommitedGrid] = useState<Grid>([]);
   const [renderedGrid, setRenderedGrid] = useState<Grid>([]);
   const [currentTetromino, setCurrentTetromino] = useState<Tetromino | null>(null);
@@ -39,7 +39,11 @@ const Game = ({
   };
 
   const commit = (tetromino: Tetromino) => {
-    setCommitedGrid(g => clearRows(width, renderTetromino(g, tetromino), addition => setScore(oldScore => oldScore + addition)));
+    setCommitedGrid(g => {
+      return clearRows(width, renderTetromino(g, tetromino), addition => {
+        return setClearedLines(oldScore => oldScore + addition);
+      });
+    });
     return fetchNextTetromino();
   };
 
@@ -52,7 +56,7 @@ const Game = ({
     const emptyGrid = Array(width * height).fill(null);
     const spawnPosition = Math.round(width * 1.5 - 1);
     const firstSet = generateShuffledShapes();
-    setScore(0);
+    setClearedLines(0);
     setCommitedGrid(emptyGrid);
     const firstTetromino = firstSet.shift();
     if (firstTetromino) {
@@ -60,7 +64,7 @@ const Game = ({
     }
     setNextTetrominoes(firstSet);
     return () => {
-      setScore(0);
+      setClearedLines(0);
       setCommitedGrid([]);
       setRenderedGrid([]);
       setCurrentTetromino(null);
@@ -114,7 +118,8 @@ const Game = ({
       </div>
       <div>
         {isOver && <h1>GAME OVER</h1>}
-        <div>Score {score}</div>
+        <div>Level: {level}</div>
+        <div>Score: {clearedLines}</div>
         <PreviewBoard list={nextTetrominoes.slice(0, 3)} />
       </div>
     </>
