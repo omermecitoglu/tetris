@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { type Grid, clearRows, generateShuffledShapes, moveTetrominoDown, renderTetromino } from "~/core/game";
+import { getGravity } from "~/core/gravity";
 import { Tetromino, type TetrominoShape } from "~/core/tetromino";
+import useAnimationFrame from "~/hooks/animation";
+import { useArrowKeys, useSpaceKey } from "~/hooks/controls";
 import GameBoard from "./GameBoard";
 import PreviewBoard from "./PreviewBoard";
 
@@ -13,15 +16,16 @@ const Game = ({
   width,
   height,
 }: GameProps) => {
-  const level = 1;
-  const speed = (0.8 - ((level - 1) * 0.007)) * 1000;
   const [isOver, setIsOver] = useState(false);
+  const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
-  const [turbo, setTurbo] = useState(false);
-  const [commitedGrid, setCommitedGrid] = useState<Grid | null>(null);
-  const [renderedGrid, setRenderedGrid] = useState<Grid | null>(null);
+  const [commitedGrid, setCommitedGrid] = useState<Grid>([]);
+  const [renderedGrid, setRenderedGrid] = useState<Grid>([]);
   const [currentTetromino, setCurrentTetromino] = useState<Tetromino | null>(null);
   const [nextTetrominoes, setNextTetrominoes] = useState<TetrominoShape[]>([]);
+  const totalFrames = useRef(0);
+  const [left, right, up, down] = useArrowKeys();
+  const space = useSpaceKey();
 
   const fetchNextTetromino = () => {
     const next = nextTetrominoes.shift();
@@ -35,8 +39,13 @@ const Game = ({
   };
 
   const commit = (tetromino: Tetromino) => {
-    setCommitedGrid(g => g && clearRows(width, renderTetromino(g, tetromino), addition => setScore(oldScore => oldScore + addition)));
+    setCommitedGrid(g => clearRows(width, renderTetromino(g, tetromino), addition => setScore(oldScore => oldScore + addition)));
     return fetchNextTetromino();
+  };
+
+  const updateTetromino = (getMutatedTetromino: (lastTetromino: Tetromino) => Tetromino) => {
+    if (isOver || !commitedGrid.length || !currentTetromino) return;
+    setCurrentTetromino(t => t && getMutatedTetromino(t));
   };
 
   useEffect(() => {
@@ -52,71 +61,59 @@ const Game = ({
     setNextTetrominoes(firstSet);
     return () => {
       setScore(0);
-      setCommitedGrid(null);
-      setRenderedGrid(null);
+      setCommitedGrid([]);
+      setRenderedGrid([]);
       setCurrentTetromino(null);
       setNextTetrominoes([]);
     };
   }, [width, height]);
 
   useEffect(() => {
-    if (!commitedGrid || !currentTetromino) return ;
+    if (!commitedGrid.length || !currentTetromino) return ;
     setRenderedGrid(renderTetromino(commitedGrid, currentTetromino));
   }, [currentTetromino, commitedGrid]);
 
   useEffect(() => {
-    if (isOver) return alert("Game Over");
-    if (!commitedGrid || !currentTetromino) return;
-
-    if (currentTetromino.willCollide(0, commitedGrid)) {
-      return setIsOver(true);
+    if (up) {
+      updateTetromino(t => t.rotate(commitedGrid));
     }
+  }, [up]);
 
-    const timer = setInterval(() => {
-      setCurrentTetromino(t => t && moveTetrominoDown(t, commitedGrid, width, height, commit));
-    }, turbo ? 50 : speed);
+  useEffect(() => {
+    if (space) {
+      updateTetromino(t => t.getShadow(commitedGrid));
+    }
+  }, [space]);
 
-    const keyDownListener = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        setCurrentTetromino(t => t && t.pushLeft(commitedGrid));
+  const animationCallback = useCallback(
+    (frame: number) => {
+      if (isOver) return;
+      if (currentTetromino?.willCollide(0, commitedGrid)) {
+        return setIsOver(true);
       }
-      if (e.key === "ArrowRight") {
-        setCurrentTetromino(t => t && t.pushRight(commitedGrid));
+      if (left && !right && frame % 6 === 0) {
+        updateTetromino(t => t.pushLeft(commitedGrid));
       }
-      if (e.key === "ArrowUp" && !e.repeat) {
-        setCurrentTetromino(t => t && t.rotate(commitedGrid));
+      if (right && !left && frame % 6 === 0) {
+        updateTetromino(t => t.pushRight(commitedGrid));
       }
-      if (e.key === "ArrowDown" && !e.repeat) {
-        setTurbo(true);
+      totalFrames.current++;
+      if (totalFrames.current % Math.min(getGravity(level), down ? 4 : 60) === 0) {
+        updateTetromino(t => moveTetrominoDown(t, commitedGrid, width, height, commit));
       }
-      if (e.key === " " && !e.repeat) {
-        setCurrentTetromino(t => t && t.getShadow(commitedGrid));
-      }
-    };
-    document.body.addEventListener("keydown", keyDownListener);
+    },
+    [left, right, down, commitedGrid, level, isOver],
+  );
 
-    const keyUpListener = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown" && !e.repeat) {
-        setTurbo(false);
-      }
-    };
-    document.body.addEventListener("keyup", keyUpListener);
-
-    return () => {
-      clearInterval(timer);
-      document.body.removeEventListener("keydown", keyDownListener);
-      document.body.removeEventListener("keyup", keyUpListener);
-    };
-  }, [isOver, commitedGrid, turbo]);
+  useAnimationFrame(animationCallback);
 
   return (
     <>
       <div>
-        {commitedGrid &&
-          <GameBoard columns={width} rows={height} size={32} grid={renderedGrid ?? commitedGrid} />
-        }
+        <GameBoard columns={width} rows={height} size={32} grid={renderedGrid} />
       </div>
       <div>
+        {isOver && <h1>GAME OVER</h1>}
         <div>Score {score}</div>
         <PreviewBoard list={nextTetrominoes.slice(0, 3)} />
       </div>
