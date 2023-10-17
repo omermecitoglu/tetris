@@ -3,7 +3,7 @@
   "name": "tetris",
   "version": "1.0.0",
   "homepage": "https://omermecitoglu.github.io/tetris",
-  "description": "Tetris with SVG Graphics",
+  "description": "a Tetris clone with SVG Graphics",
   "main": "index.js",
   "scripts": {
     "prebuild": "ts-unused-exports tsconfig.json",
